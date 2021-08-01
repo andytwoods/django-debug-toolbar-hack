@@ -1,3 +1,8 @@
+import os
+import subprocess
+import sys
+import webbrowser
+
 from django.core import signing
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.template import Origin, TemplateDoesNotExist
@@ -35,6 +40,22 @@ def template_source(request):
                 final_loaders += loader.loaders
             else:
                 final_loaders.append(loader)
+
+    open_backend = request.GET.get('open_backend', False)
+    if open_backend:
+        origin = str(Origin(template_origin_name))
+        if sys.platform == 'win32':
+            subprocess.Popen(['start', origin], shell=True)
+
+        elif sys.platform == 'darwin':
+            subprocess.Popen(['open', origin])
+
+        else:
+            try:
+                subprocess.Popen(['xdg-open', origin])
+            except OSError:
+                pass
+        return JsonResponse({})
 
     for loader in final_loaders:
         origin = Origin(template_origin_name)

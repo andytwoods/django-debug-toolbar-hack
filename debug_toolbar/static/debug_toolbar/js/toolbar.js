@@ -98,6 +98,9 @@ const djdt = {
             }
 
             ajax(url, ajax_data).then(function (data) {
+                if(Object.keys(data).length===0) { // used for opening templates in the backend
+                    return;
+                }
                 const win = document.getElementById("djDebugWindow");
                 win.innerHTML = data.content;
                 $$.show(win);

@@ -610,3 +610,11 @@
 .djdt-hidden {
     display: none;
 }
+
+.djdt-backend-open {
+    color: #999!important;
+    font-style: normal!important;
+    font-weight: normal!important;
+    text-decoration: none!important;
+    padding-left: 25px!important;
+}
