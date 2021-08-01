@@ -12,8 +12,7 @@ from django.utils.safestring import mark_safe
 from debug_toolbar.decorators import require_show_toolbar
 
 
-@require_show_toolbar
-def template_source(request):
+def load_element(request):
     """
     Return the source of a template, syntax-highlighted by Pygments if
     it's available.
