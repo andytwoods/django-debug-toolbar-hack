@@ -7,22 +7,21 @@ from django import http
 from django.core import signing
 from django.db.models.query import QuerySet, RawQuerySet
 from django.template import RequestContext, Template, loader
-from django.template.loaders.base import Loader
 from django.test.signals import template_rendered
 from django.test.utils import instrumented_test_render
-from django.urls import path, reverse
+from django.urls import path, reverse, resolve
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from debug_toolbar.panels import Panel
 from debug_toolbar.panels.sql.tracking import SQLQueryTriggered, recording
+# Code taken and adapted from Simon Willison and Django Snippets:
+# https://www.djangosnippets.org/snippets/766/
+from debug_toolbar.utils import get_name_from_obj
+from example.frogpanel import views
 
 # Monkey-patch to enable the template_rendered signal. The receiver returns
 # immediately when the panel is disabled to keep the overhead small.
-
-# Code taken and adapted from Simon Willison and Django Snippets:
-# https://www.djangosnippets.org/snippets/766/
-from example.frogpanel import views
 
 if Template._render != instrumented_test_render:
     Template.original_render = Template._render
@@ -80,9 +79,11 @@ class FrogPanel(Panel):
         is_debug_toolbar_template = isinstance(template.name, str) and (
             template.name.startswith("debug_toolbar/")
             or template.name.startswith(
-                tuple(self.toolbar.config["SKIP_TEMPLATE_PREFIXES"])
-            )
+            tuple(self.toolbar.config["SKIP_TEMPLATE_PREFIXES"])
         )
+        )
+        self.template_name = template.name
+
         if is_debug_toolbar_template:
             return
 
@@ -143,7 +144,7 @@ class FrogPanel(Panel):
 
     # Implement the Panel API
 
-    nav_title = _("Load main template")
+    nav_title = _("Load in IDE")
 
     @property
     def title(self):
@@ -152,25 +153,29 @@ class FrogPanel(Panel):
             "num_templates": num_templates
         }
 
-
     @property
     def nav_subtitle(self):
         """
         Show abbreviated name of view function as subtitle
         """
-        view_func = self.get_stats().get("view_func", "")
-        print(view_func)
-        view_name =  view_func.rsplit(".", 1)[-1]
+
+        match = resolve(self.toolbar.request.path)
+        func, args, kwargs = match
+        view_name = get_name_from_obj(func)
 
         template = loader.get_template('frogpanel/frogtitle.html')
-        context = {'url': reverse('djdt:load_element')}
+        context = {
+                   'template_name': self.template_name,
+                   'view_name': view_name,
+                   }
         return mark_safe(template.render(context=context))
 
     template = "frogpanel/frogpanel.html"
 
     @classmethod
     def get_urls(cls):
-        return [path("load_element/", views.load_element, name="load_element")]
+        return [path("load_view/", views.load_view, name="load_view"),
+                path("load_template/", views.load_template, name="load_template")]
 
     def enable_instrumentation(self):
         template_rendered.connect(self._store_template_info)

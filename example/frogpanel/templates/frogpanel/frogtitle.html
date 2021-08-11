@@ -1,9 +1,17 @@
-f"<a class='' onclick='pingbackend("template")' href='{url}?element=template'>template</a><\br><a class='' onclick='pingbackend("view")' href='{url}?element=view'>view</a>"
+<div>
+  <a class='' style="color: white; margin-left:26px;"  onclick='pingbackend(this)' href='{% url 'djdt:load_template' %}'>{{ template_name }}</a>
+</div>
+<div>
+  <a class='' style="color: white; margin-left:26px;word-wrap: break-word" onclick='pingbackend(this)' href='{% url 'djdt:load_view' %}'>{{ view_name }}</a>
+</div>
+
 
 
 <script>
-  function ajax(url, init) {
-    init = Object.assign({ credentials: "same-origin" }, init);
+
+  function ajax(url) {
+    console.log(url,22)
+    var init = { credentials: "same-origin" };
     return fetch(url, init)
         .then(function (response) {
             if (response.ok) {
@@ -23,9 +31,8 @@ f"<a class='' onclick='pingbackend("template")' href='{url}?element=template'>te
             throw error;
         });
 }
-function pingbackend(what) {
-    console.log(22)
-  ajax('{{ url }}', {'what': what})
+function pingbackend(el) {
+  ajax(el.href)
   return false;
 }
 </script>

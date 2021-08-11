@@ -7,12 +7,21 @@ from django.http import HttpResponseBadRequest, JsonResponse
 from django.template import Origin, TemplateDoesNotExist
 from django.template.engine import Engine
 from django.template.loader import render_to_string
+from django.urls import resolve
 from django.utils.safestring import mark_safe
 
 from debug_toolbar.decorators import require_show_toolbar
+from debug_toolbar.utils import get_name_from_obj
 
 
-def load_element(request):
+def load_view(request):
+    match = resolve(request.path)
+    func, args, kwargs = match
+    view_el = get_name_from_obj(func)
+    return load_element(f'{view_el}.py')
+
+def load_template(request):
+    # stolen from debug_toolbar\panels\templates\views.py
     """
     Return the source of a template, syntax-highlighted by Pygments if
     it's available.
@@ -43,43 +52,27 @@ def load_element(request):
 
     if open_backend:
         origin = str(Origin(template_origin_name))
-        if sys.platform == 'win32':
-            print(origin)
-            p = subprocess.Popen(["C:/Program Files/JetBrains/PyCharm 2020.1/bin/pycharm64.exe", origin])
+        return load_element(origin)
 
-        elif sys.platform == 'darwin':
-            subprocess.Popen(['open', origin])
+def load_element(el):
+    """
+    Return the source of a template, syntax-highlighted by Pygments if
+    it's available.
+    """
+    el = el.replace('.', '//')
+    print(el)
 
-        else:
-            try:
-                subprocess.Popen(['xdg-open', origin])
-            except OSError:
-                pass
-        return JsonResponse({})
+    if sys.platform == 'win32':
+        print(el)
+        p = subprocess.Popen(["C:/Program Files/JetBrains/PyCharm 2020.1/bin/pycharm64.exe", el])
 
-    for loader in final_loaders:
-        origin = Origin(template_origin_name)
-        try:
-            source = loader.get_contents(origin)
-            break
-        except TemplateDoesNotExist:
-            pass
+    elif sys.platform == 'darwin':
+        subprocess.Popen(['open', el])
+
     else:
-        source = "Template Does Not Exist: {}".format(template_origin_name)
+        try:
+            subprocess.Popen(['xdg-open', el])
+        except OSError:
+            pass
+    return JsonResponse({})
 
-    try:
-        from pygments import highlight
-        from pygments.formatters import HtmlFormatter
-        from pygments.lexers import HtmlDjangoLexer
-
-        source = highlight(source, HtmlDjangoLexer(), HtmlFormatter())
-        source = mark_safe(source)
-        source.pygmentized = True
-    except ImportError:
-        pass
-
-    content = render_to_string(
-        "debug_toolbar/panels/template_source.html",
-        {"source": source, "template_name": template_name},
-    )
-    return JsonResponse({"content": content})

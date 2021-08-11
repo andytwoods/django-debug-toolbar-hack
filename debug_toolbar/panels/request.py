@@ -52,7 +52,7 @@ class RequestPanel(Panel):
         Show abbreviated name of view function as subtitle
         """
         view_func = self.get_stats().get("view_func", "")
-        print(view_func)
+
         view_name =  view_func.rsplit(".", 1)[-1]
         return mark_safe(f"<a class='djdt-backend-open' href='{reverse('djdt:py_source')}'>{view_name}</a>")
 
