@@ -1,3 +1,4 @@
+import pathlib
 import subprocess
 import subprocess
 import sys
@@ -18,7 +19,9 @@ def load_view(request):
     match = resolve(request.path)
     func, args, kwargs = match
     view_el = get_name_from_obj(func)
-    return load_element(f'{view_el}.py')
+    explicit_path = pathlib.Path(__file__).parent.resolve()
+    el = load_element(f'{explicit_path}\{view_el}.py')
+    return el
 
 def load_template(request):
     # stolen from debug_toolbar\panels\templates\views.py
@@ -60,10 +63,9 @@ def load_element(el):
     it's available.
     """
     el = el.replace('.', '//')
-    print(el)
-
+    print(111,el, 'JACKSON')
     el = 'C:/Users/andy_/PycharmProjects/django-debug-toolbar-hack/README.rst'
-
+    el = 'example/frogpanel/views/load_view.py'
     try:
         ide = settings.DJANGO_IDE
     except AttributeError:
