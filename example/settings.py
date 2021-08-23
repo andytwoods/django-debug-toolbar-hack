@@ -113,3 +113,5 @@ DEBUG_TOOLBAR_PANELS = [
     "debug_toolbar.panels.redirects.RedirectsPanel",
     "debug_toolbar.panels.profiling.ProfilingPanel",
 ]
+
+DJANGO_IDE = 'C:/Users/andy_/AppData/Local/JetBrains/Toolbox/apps\PyCharm-P/ch-0/202.7319.64/bin/pycharm64.exe'

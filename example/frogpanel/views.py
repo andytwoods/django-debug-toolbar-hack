@@ -1,7 +1,7 @@
 import subprocess
 import subprocess
 import sys
-
+from django.conf import settings
 from django.core import signing
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.template import Origin, TemplateDoesNotExist
@@ -62,9 +62,18 @@ def load_element(el):
     el = el.replace('.', '//')
     print(el)
 
+    el = 'C:/Users/andy_/PycharmProjects/django-debug-toolbar-hack/README.rst'
+
+    try:
+        ide = settings.DJANGO_IDE
+    except AttributeError:
+        ide = 'C:/Program Files/JetBrains/PyCharm 2020.1/bin/pycharm64.exe'
+
+
     if sys.platform == 'win32':
         print(el)
-        p = subprocess.Popen(["C:/Program Files/JetBrains/PyCharm 2020.1/bin/pycharm64.exe", el])
+
+        p = subprocess.Popen([ide, el])
 
     elif sys.platform == 'darwin':
         subprocess.Popen(['open', el])
