@@ -1,3 +1,4 @@
+import inspect
 import pathlib
 import subprocess
 import subprocess
@@ -18,9 +19,9 @@ from debug_toolbar.utils import get_name_from_obj
 def load_view(request):
     match = resolve(request.path)
     func, args, kwargs = match
-    view_el = get_name_from_obj(func)
-    explicit_path = pathlib.Path(__file__).parent.resolve()
-    el = load_element(f'{explicit_path}\{view_el}.py')
+    info = inspect.getsourcefile(func)
+    el = load_element(info)
+    print(1)
     return el
 
 def load_template(request):
@@ -62,15 +63,11 @@ def load_element(el):
     Return the source of a template, syntax-highlighted by Pygments if
     it's available.
     """
-    el = el.replace('.', '//')
-    print(111,el, 'JACKSON')
-    el = 'C:/Users/andy_/PycharmProjects/django-debug-toolbar-hack/README.rst'
-    el = 'example/frogpanel/views/load_view.py'
+
     try:
         ide = settings.DJANGO_IDE
     except AttributeError:
         ide = 'C:/Program Files/JetBrains/PyCharm 2020.1/bin/pycharm64.exe'
-
 
     if sys.platform == 'win32':
         print(el)
