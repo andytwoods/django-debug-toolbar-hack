@@ -16,20 +16,13 @@ from debug_toolbar.decorators import require_show_toolbar
 from debug_toolbar.utils import get_name_from_obj
 
 
-def load_view(request):
-    match = resolve(request.path)
-    func, args, kwargs = match
-    info = inspect.getsourcefile(func)
-    el = load_element(info)
-    print(1)
-    return el
-
-def load_template(request):
+def open_view(request):
     # stolen from debug_toolbar\panels\templates\views.py
     """
     Return the source of a template, syntax-highlighted by Pygments if
     it's available.
     """
+
     template_origin_name = request.GET.get("template_origin")
     if template_origin_name is None:
         return HttpResponseBadRequest('"template_origin" key is required')
@@ -39,26 +32,18 @@ def load_template(request):
         return HttpResponseBadRequest('"template_origin" is invalid')
     template_name = request.GET.get("template", template_origin_name)
 
-    final_loaders = []
-    loaders = Engine.get_default().template_loaders
+    origin = str(Origin(template_origin_name))
+    return open_element(origin)
 
-    for loader in loaders:
-        if loader is not None:
-            # When the loader has loaders associated with it,
-            # append those loaders to the list. This occurs with
-            # django.template.loaders.cached.Loader
-            if hasattr(loader, "loaders"):
-                final_loaders += loader.loaders
-            else:
-                final_loaders.append(loader)
 
-    open_backend = request.GET.get('open_backend', True)
+def open_template(request):
+    match = resolve(request.path)
+    func, _, _ = match
+    info = inspect.getsourcefile(func)
+    return open_element(info)
 
-    if open_backend:
-        origin = str(Origin(template_origin_name))
-        return load_element(origin)
 
-def load_element(el):
+def open_element(el):
     """
     Return the source of a template, syntax-highlighted by Pygments if
     it's available.
@@ -67,12 +52,10 @@ def load_element(el):
     try:
         ide = settings.DJANGO_IDE
     except AttributeError:
-        ide = 'C:/Program Files/JetBrains/PyCharm 2020.1/bin/pycharm64.exe'
+        ide = 'open'
 
     if sys.platform == 'win32':
-        print(el)
-
-        p = subprocess.Popen([ide, el])
+        subprocess.Popen([ide, el])
 
     elif sys.platform == 'darwin':
         subprocess.Popen(['open', el])
