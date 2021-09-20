@@ -175,7 +175,8 @@ class FrogPanel(Panel):
     @classmethod
     def get_urls(cls):
         return [path("load_view/", views.load_view, name="load_view"),
-                path("load_template/", views.load_template, name="load_template")]
+                path("load_template/", views.load_template, name="load_template"),
+                path("load_t/", views.load_t, name="load_t")]
 
     def enable_instrumentation(self):
         template_rendered.connect(self._store_template_info)

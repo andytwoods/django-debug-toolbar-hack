@@ -1,6 +1,9 @@
+import inspect
+import os
 import subprocess
 import subprocess
 import sys
+from django.conf import settings
 
 from django.core import signing
 from django.http import HttpResponseBadRequest, JsonResponse
@@ -17,8 +20,15 @@ from debug_toolbar.utils import get_name_from_obj
 def load_view(request):
     match = resolve(request.path)
     func, args, kwargs = match
-    view_el = get_name_from_obj(func)
-    return load_element(f'{view_el}.py')
+    loc = os.path.abspath(inspect.getfile(func))
+    return load_element(loc)
+
+def load_t(request):
+    match = resolve(request.path)
+    func, args, kwargs = match
+    loc = os.path.abspath(inspect.getfile(func))
+
+    return load_element(loc)
 
 def load_template(request):
     # stolen from debug_toolbar\panels\templates\views.py
@@ -26,6 +36,7 @@ def load_template(request):
     Return the source of a template, syntax-highlighted by Pygments if
     it's available.
     """
+    a = request.META.HTTP_REFERER
     template_origin_name = request.GET.get("template_origin")
     if template_origin_name is None:
         return HttpResponseBadRequest('"template_origin" key is required')
@@ -53,14 +64,13 @@ def load_template(request):
     if open_backend:
         origin = str(Origin(template_origin_name))
         return load_element(origin)
+    return load_element('s')
 
 def load_element(el):
     """
     Return the source of a template, syntax-highlighted by Pygments if
     it's available.
     """
-    el = el.replace('.', '//')
-    print(el)
 
     if sys.platform == 'win32':
         print(el)

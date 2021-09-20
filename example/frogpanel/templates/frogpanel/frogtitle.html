@@ -4,13 +4,15 @@
 <div>
   <a class='' style="color: white; margin-left:26px;word-wrap: break-word" onclick='pingbackend(this)' href='{% url 'djdt:load_view' %}'>{{ view_name }}</a>
 </div>
+<div>
+  <a class='' style="color: white; margin-left:26px;word-wrap: break-word" onclick='pingbackend(this)' href='{% url 'djdt:load_t' %}'>tttt</a>
+</div>
 
 
 
 <script>
 
   function ajax(url) {
-    console.log(url,22)
     var init = { credentials: "same-origin" };
     return fetch(url, init)
         .then(function (response) {
