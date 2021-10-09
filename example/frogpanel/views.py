@@ -5,33 +5,18 @@ import sys
 from django.conf import settings
 from django.core import signing
 from django.http import HttpResponseBadRequest, JsonResponse
-from django.template import Origin
+from django.template import Origin, Engine, TemplateDoesNotExist
+from django.template.loader import render_to_string, get_template
 from django.urls import resolve, reverse
 
 
 def open_template(request):
 
-    # stolen from debug_toolbar\panels\templates\views.py
-    """
-    Return the source of a template, syntax-highlighted by Pygments if
-    it's available.
-    """
+    template_name = request.GET.get('template')
 
-    urls = {
-        'ABSOLUTE_ROOT': request.build_absolute_uri('/')[:-1].strip("/"),
-        'ABSOLUTE_ROOT_URL': request.build_absolute_uri('/').strip("/"),
-    }
-    host = request.get_host()
-    url_name = resolve(request.path_info).url_name
-    referrer = request.META['HTTP_REFERER']
+    template = get_template(template_name)
 
-    url_ending = referrer.split(host)[1].lstrip("/")
-    named_url = reverse(request.path_info)
-    print(named_url)
-    return ''
-
-    origin = str(Origin(template_origin_name))
-    return open_element(origin)
+    return open_element(template.origin.name)
 
 
 def open_view(request):
