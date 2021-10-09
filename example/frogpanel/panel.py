@@ -9,7 +9,7 @@ from django.db.models.query import QuerySet, RawQuerySet
 from django.template import RequestContext, Template, loader
 from django.test.signals import template_rendered
 from django.test.utils import instrumented_test_render
-from django.urls import path, reverse, resolve
+from django.urls import path, resolve
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
@@ -165,18 +165,19 @@ class FrogPanel(Panel):
 
         template = loader.get_template('frogpanel/frogtitle.html')
         context = {
-                   'template_name': self.template_name,
-                   'view_name': view_name,
-                   }
+            'template_name': self.template_name,
+            'view_name': view_name,
+        }
         return mark_safe(template.render(context=context))
 
     template = "frogpanel/frogpanel.html"
 
     @classmethod
     def get_urls(cls):
-        return [path("load_view/", views.load_view, name="load_view"),
-                path("load_template/", views.load_template, name="load_template"),
-                path("load_t/", views.load_t, name="load_t")]
+        return [
+            path("open_template/", views.open_template, name="open_template"),
+            path("open_view/", views.open_view, name="open_view"),
+        ]
 
     def enable_instrumentation(self):
         template_rendered.connect(self._store_template_info)
